@@ -1,0 +1,230 @@
+From 0066aa2c2f6e0404294cb4960135884c4b6fa7ff Mon Sep 17 00:00:00 2001
+From: xiaoweiMA <e2195816@cmaisonneuve.qc.ca>
+Date: Thu, 4 Apr 2024 19:43:03 -0400
+Subject: [PATCH 1/4] display fire only in Alberta
+
+---
+ q2.html    | 55 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ q2_fr.html | 53 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 108 insertions(+)
+ create mode 100644 q2.html
+ create mode 100644 q2_fr.html
+
+diff --git a/q2.html b/q2.html
+new file mode 100644
+index 0000000..904fcff
+--- /dev/null
++++ b/q2.html
+@@ -0,0 +1,55 @@
++<!DOCTYPE html>
++<html>
++
++<head>
++    <title>Alberta Active Fires</title>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0">
++    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.css" />
++    <style>
++        #mapid {
++            height: 600px;
++        }
++    </style>
++</head>
++
++<body>
++    <div id="mapid"></div>
++
++    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.js"></script>
++    <script>
++        var map = L.map('mapid').setView([55, -113], 5);
++        
++        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
++            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
++        }).addTo(map);
++
++        fetch('https://cwfis.cfs.nrcan.gc.ca/geoserver/public/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:activefires_current&srsname=EPSG:4326&outputFormat=json')
++            .then(response => response.json())
++            .then(data => {
++                var albertaFires = data.features.filter(feature => feature.properties.agency === 'ab');
++                L.geoJSON(albertaFires, {
++                    style: function (feature) {
++                        var fill_value = 0.5
++                        var options = {
++                            color: '#FF0000',
++                            weight: 2,
++                            fillOpacity: fill_value
++                        }
++                        return options;
++                    },
++                    onEachFeature: function (feature, layer) {
++                        var d = new Date(feature.properties.startdate)
++                        var popupContent = "<p>"
++                            + "Size: " + feature.properties.hectares + "<br/>"
++                            + "</p>";
++                        layer.bindPopup(popupContent);
++                    },
++                    pointToLayer: function (feature, latlng) {
++                        return L.circleMarker(latlng);
++                    }
++                }).addTo(map);
++            });
++    </script>
++</body>
++</html>
+\ No newline at end of file
+diff --git a/q2_fr.html b/q2_fr.html
+new file mode 100644
+index 0000000..947a60b
+--- /dev/null
++++ b/q2_fr.html
+@@ -0,0 +1,53 @@
++<!DOCTYPE html>
++<html>
++
++<head>
++    <title>Les feux actifs en Alberta</title>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0">
++    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.css" />
++    <style>
++        #mapid {
++            height: 600px;
++        }
++    </style>
++</head>
++
++<body>
++    <div id="mapid"></div>
++
++    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.js"></script>
++    <script>
++        var map = L.map('mapid').setView([55, -113], 5);
++
++        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
++            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
++        }).addTo(map);
++
++        fetch('https://cwfis.cfs.nrcan.gc.ca/geoserver/public/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:activefires_current&srsname=EPSG:4326&outputFormat=json')
++            .then(response => response.json())
++            .then(data => {
++                L.geoJSON(data.features, {
++                    style: function (feature) {
++                        var options = {
++                            color: '#FF0000',
++                            weight: 2,
++                            fillOpacity: 0.5
++                        }
++                        return options;
++                    },
++                    onEachFeature: function (feature, layer) {
++                        var popupContent = "<p>"
++                            + "Taille: " + feature.properties.hectares + "<br/>"
++                            + "</p>";
++                        layer.bindPopup(popupContent);
++                    },
++                    pointToLayer: function (feature, latlng) {
++                        return L.circleMarker(latlng);
++                    }
++                }).addTo(map);
++            });
++    </script>
++</body>
++
++</html>
+\ No newline at end of file
+-- 
+2.44.0.windows.1
+
+
+From 89dbf2bce4dbef3a863974e5849b76eb3efd8f16 Mon Sep 17 00:00:00 2001
+From: xiaoweiMA <e2195816@cmaisonneuve.qc.ca>
+Date: Thu, 4 Apr 2024 19:44:47 -0400
+Subject: [PATCH 2/4] Only display fire originated in Alberta
+
+---
+ q2.html | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/q2.html b/q2.html
+index 904fcff..bd5f497 100644
+--- a/q2.html
++++ b/q2.html
+@@ -27,6 +27,7 @@
+         fetch('https://cwfis.cfs.nrcan.gc.ca/geoserver/public/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=public:activefires_current&srsname=EPSG:4326&outputFormat=json')
+             .then(response => response.json())
+             .then(data => {
++                /*display only fire in ablerta*/
+                 var albertaFires = data.features.filter(feature => feature.properties.agency === 'ab');
+                 L.geoJSON(albertaFires, {
+                     style: function (feature) {
+-- 
+2.44.0.windows.1
+
+
+From 5dd8c226ec7d25f1b408bc2e074cd2b0f52d2c06 Mon Sep 17 00:00:00 2001
+From: xiaoweiMA <e2195816@cmaisonneuve.qc.ca>
+Date: Thu, 4 Apr 2024 19:57:11 -0400
+Subject: [PATCH 3/4] display fire name, stage of control, and start date
+
+---
+ q2.html | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/q2.html b/q2.html
+index bd5f497..5782405 100644
+--- a/q2.html
++++ b/q2.html
+@@ -19,7 +19,9 @@
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.js"></script>
+     <script>
+         var map = L.map('mapid').setView([55, -113], 5);
+-        
++        const months = ["January", "February", "March", "April", "May", "June",
++        "July", "August", "September", "October", "November", "December"];
++
+         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+         }).addTo(map);
+@@ -42,6 +44,9 @@
+                     onEachFeature: function (feature, layer) {
+                         var d = new Date(feature.properties.startdate)
+                         var popupContent = "<p>"
++                            + "Fire Name: " + feature.properties.firename + "<br/>"
++                            + "Stage of Control: " + feature.properties.stage_of_control + "<br/>"
++                            + "Start Date: " + months[d.getMonth()] + " " + d.getDate()+ "," + d.getFullYear() + "</br/>"
+                             + "Size: " + feature.properties.hectares + "<br/>"
+                             + "</p>";
+                         layer.bindPopup(popupContent);
+-- 
+2.44.0.windows.1
+
+
+From e0bc4f4056c358394147c4ae64e514ec754ffeae Mon Sep 17 00:00:00 2001
+From: xiaoweiMA <e2195816@cmaisonneuve.qc.ca>
+Date: Thu, 4 Apr 2024 20:00:17 -0400
+Subject: [PATCH 4/4] add filter to display hectares
+
+---
+ q2.html | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/q2.html b/q2.html
+index 5782405..28d9d66 100644
+--- a/q2.html
++++ b/q2.html
+@@ -34,6 +34,12 @@
+                 L.geoJSON(albertaFires, {
+                     style: function (feature) {
+                         var fill_value = 0.5
++                        /*caculated hectares*/
++                        if (feature.properties.hectares < 1)
++                          fill_value = 0
++                        else if (feature.properties.hectares > 1000)
++                          fill_value = 1
++
+                         var options = {
+                             color: '#FF0000',
+                             weight: 2,
+-- 
+2.44.0.windows.1
+

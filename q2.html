@@ -34,6 +34,12 @@
                 L.geoJSON(albertaFires, {
                     style: function (feature) {
                         var fill_value = 0.5
+                        /*caculated hectares*/
+                        if (feature.properties.hectares < 1)
+                          fill_value = 0
+                        else if (feature.properties.hectares > 1000)
+                          fill_value = 1
+
                         var options = {
                             color: '#FF0000',
                             weight: 2,
